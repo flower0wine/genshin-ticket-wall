@@ -1,5 +1,24 @@
 // Prompt templates for whole-ticket generation, one per variant, mirroring the
 // four reference tickets (Miku Symphony / Teto Expo / vFlower World Tour / GUMI Grid).
+// Poses vary per character (like the reference: wave / salute / peace sign / pose),
+// microphone is only one of several options — not every character holds one.
+
+const POSES = [
+  "waving cheerfully to the crowd with one hand raised high",
+  "striking a playful idol pose with a peace sign near the face",
+  "saluting playfully with one hand at the brow",
+  "arms spread wide welcoming the audience, joyful expression",
+  "singing into a handheld microphone, eyes closed happily",
+  "pointing energetically at the sky with one finger, dynamic stance",
+  "hands clasped together delightedly, bouncing on the toes",
+  "holding a microphone stand leaning on it coolly",
+  "twirling with one arm extended gracefully",
+  "fist pumped in the air triumphantly, confident grin",
+  "beckoning the audience with one hand, mischievous smile",
+  "both hands forming a heart shape toward the crowd",
+];
+export const poseFor = (seed) => POSES[seed % POSES.length];
+
 const PREAMBLE = (c, zh) => `Use your image_generation tool to generate ONE finished concert-ticket illustration, then save it into this project.
 
 ATTACHED REFERENCES:
@@ -7,6 +26,7 @@ ATTACHED REFERENCES:
 - Image 2 is the CHARACTER design anchor (official icon): the character MUST keep this exact hair color/style, eye color, outfit colors and signature accessories.
 
 CHARACTER: ${c.name} (${zh}) from Genshin Impact. ${c.description} Element: ${c.vision || "none (Traveler)"}. Nation: ${c.nation}.
+POSE: the character is ${"{POSE}"} — a natural stage gesture, NOT necessarily holding a microphone.
 `;
 
 const OUTPUT = `
@@ -22,44 +42,44 @@ STEPS:
 3. Copy it to OUT_PATH (create directories; convert to PNG if needed).
 4. Reply with the final absolute path only.`;
 
-function symphony(c, s, zh) {
+function symphony(c, s, zh, pose) {
   const p = s.palette;
-  return `${PREAMBLE(c, zh)}
+  return `${PREAMBLE(c, zh).replace("{POSE}", pose)}
 TICKET STYLE: the TOP reference ticket (black "Electric Symphony" Miku ticket), recolored to this character's element palette.
-- LEFT ~68% MAIN area: pale tinted grid paper (background ${p.tint}, thin grid lines in ${p.deep} at low opacity) with a few faint translucent rounded UI rectangles and a subtle silhouette of ${c.nation} architecture. The character illustrated large center-left, upper-body/three-quarter, performing joyfully (singing into a microphone or striking an idol pose, one hand raised), sparkles and music notes around. A bold BLACK horizontal title banner across the lower main area reading "${c.name.split(" ")[0]} ${zh}" in heavy serif, with a small script line "${c.nation} Special Live" beneath. Tiny text "D:${(c.constellation || "VIATOR").toUpperCase().slice(0, 22)}" top-left and "//projectTEYVAT 2026" near the art.
+- LEFT ~68% MAIN area: pale tinted grid paper (background ${p.tint}, thin grid lines in ${p.deep} at low opacity) with a few faint translucent rounded UI rectangles and a subtle silhouette of ${c.nation} architecture. The character illustrated large center-left, upper-body/three-quarter, ${pose}, sparkles and music notes around. A bold BLACK horizontal title banner across the lower main area reading "${c.name.split(" ")[0]} ${zh}" in heavy serif, with a small script line "${c.nation} Special Live" beneath. Tiny text "D:${(c.constellation || "VIATOR").toUpperCase().slice(0, 22)}" top-left and "//projectTEYVAT 2026" near the art.
 - RIGHT ~32% STUB: deep ${p.deep} background, light ${p.ink} text. Top-right small "${s.serial}". Big serif date "${s.dateStr}", "${s.weekday} ${s.time}" beneath. Then "Row: ${s.row} | Seat: ${s.seat}". Bottom: a handwritten-script event logo in ${p.accent} reading "${(c.title || zh).split(" ").slice(0, 4).join(" ")}" with tiny "${c.name.toUpperCase().split(" ")[0]} SPECIAL LIVE" under it.
 - Palette: tint ${p.tint}, base ${p.base}, deep ${p.deep}, accent ${p.accent}, black banner #1c1712.
 ${OUTPUT}`;
 }
 
-function expo(c, s, zh) {
+function expo(c, s, zh, pose) {
   const p = s.palette;
   const first = c.name.toUpperCase().split(" ")[0].slice(0, 10);
-  return `${PREAMBLE(c, zh)}
+  return `${PREAMBLE(c, zh).replace("{POSE}", pose)}
 TICKET STYLE: the SECOND reference ticket (red/white "TETO EXPO" ticket), recolored to this character's element palette.
 - LEFT ~32% STUB: solid ${p.base} background, light ${p.ink} text. Top small "${s.serial.replace("No.", ".")}". Centered "ZONE: ${s.gate}" and "FREE STANDING" with a row of small diamonds beneath. A white QR-code square in the middle. Bottom bold "${first}✦ EXPO" and tiny "2026 WORLDWIDE".
-- RIGHT ~68% MAIN area: clean white (#fdfbf5) background. A vertical ${p.base} date rail on the left edge reading "${s.dateStr} ${s.time}" (vertical text). A few white barcode blocks on a colored strip. The character illustrated large center, upper-body, performing (saluting or singing), gold/accent stars around. A small BLACK rounded badge top-right containing a tiny circular portrait and "//projectTEYVAT". Bottom-right: a handwritten-script name "${c.name}" in ${p.base}, a bold "${zh} EXPO✦" wordmark, tiny "2026 WORLDWIDE", and a barcode with "${s.serial}".
+- RIGHT ~68% MAIN area: clean white (#fdfbf5) background. A vertical ${p.base} date rail on the left edge reading "${s.dateStr} ${s.time}" (vertical text). A few white barcode blocks on a colored strip. The character illustrated large center, upper-body, ${pose}, gold/accent stars around. A small BLACK rounded badge top-right containing a tiny circular portrait and "//projectTEYVAT". Bottom-right: a handwritten-script name "${c.name}" in ${p.base}, a bold "${zh} EXPO✦" wordmark, tiny "2026 WORLDWIDE", and a barcode with "${s.serial}".
 - Palette: base ${p.base}, deep ${p.deep}, accent ${p.accent}, ink ${p.ink}.
 ${OUTPUT}`;
 }
 
-function flower(c, s, zh) {
+function flower(c, s, zh, pose) {
   const p = s.palette;
-  return `${PREAMBLE(c, zh)}
+  return `${PREAMBLE(c, zh).replace("{POSE}", pose)}
 TICKET STYLE: the THIRD reference ticket (purple "vFlower World Tour" ticket), recolored to this character's element palette.
-- LEFT ~68% MAIN area: diagonal gradient from ${p.base} to ${p.deep}. The character illustrated large left, upper-body/three-quarter performing, surrounded by floating petals/sparkles in ${p.accent} and a dotted arc trail. A diagonal dark ribbon across the lower area reading "✶ ${c.name}" in handwritten script (${p.accent}) with tiny "WORLD TOUR 2026" beneath. Vertical small "${s.serial}" on the left edge, tiny "//projectTEYVAT2026" top-right, a few white barcode blocks bottom-left.
+- LEFT ~68% MAIN area: diagonal gradient from ${p.base} to ${p.deep}. The character illustrated large left, upper-body/three-quarter, ${pose}, surrounded by floating petals/sparkles in ${p.accent} and a dotted arc trail. A diagonal dark ribbon across the lower area reading "✶ ${c.name}" in handwritten script (${p.accent}) with tiny "WORLD TOUR 2026" beneath. Vertical small "${s.serial}" on the left edge, tiny "//projectTEYVAT2026" top-right, a few white barcode blocks bottom-left.
 - RIGHT ~32% STUB: deep ${p.deep} background, light ${p.ink} text. A vertical "✶ ADMIT ONE ✶" rail on its left edge (rotated text). Inside: tiny "World Tour" and big serif year "${s.dateStr.slice(0, 4)}", a large handwritten-script "${zh}" in ${p.accent}, then "GATE ${s.gate}  ROW ${s.row}  SEAT ${s.seat}" in serif, and a row of small diamonds at the bottom.
 - Palette: base ${p.base}, deep ${p.deep}, accent ${p.accent}, ink ${p.ink}.
 ${OUTPUT}`;
 }
 
-function grid(c, s, zh) {
+function grid(c, s, zh, pose) {
   const p = s.palette;
   const first = c.name.split(" ")[0];
   const chant = `${first.toUpperCase()}! ${first.toUpperCase()}! ${first.toUpperCase()}!`;
-  return `${PREAMBLE(c, zh)}
+  return `${PREAMBLE(c, zh).replace("{POSE}", pose)}
 TICKET STYLE: the BOTTOM reference ticket (green "GUMI SPECIAL LIVE" ticket), recolored to this character's element palette.
-- LEFT ~68% MAIN area: solid ${p.base} background covered by a 4×2 grid of small rounded portrait tiles of the character (pale ${p.tint} tiles). A bold chant strip across the TOP reading "${chant}" and a mirrored chant strip across the BOTTOM (light text on ${p.deep}). The character illustrated LARGE in the center, overflowing slightly above and below the ticket, full chibi body performing joyfully. Vertical small "${zh}特别演唱会" on the right.
+- LEFT ~68% MAIN area: solid ${p.base} background covered by a 4×2 grid of small rounded portrait tiles of the character (pale ${p.tint} tiles). A bold chant strip across the TOP reading "${chant}" and a mirrored chant strip across the BOTTOM (light text on ${p.deep}). The character illustrated LARGE in the center, overflowing slightly above and below the ticket, full chibi body ${pose}. Vertical small "${zh}特别演唱会" on the right.
 - RIGHT ~32% STUB: clean white (#fdfbf5) background, dark text. A handwritten-script triple chant "${first}! ${first}! ${first}!" in ${p.base} top-left. Vertical "${s.dateStr} ${s.time}" on the right edge. A boxed "AREA ${s.gate}  ROW ${s.row}  SEAT ${s.seat}" section (each value in a pale ${p.tint} box). A barcode with "${s.serial}" at the bottom.
 - Palette: base ${p.base}, deep ${p.deep}, accent ${p.accent}, tint ${p.tint}.
 ${OUTPUT}`;
@@ -68,5 +88,6 @@ ${OUTPUT}`;
 const BUILDERS = { symphony, expo, flower, grid };
 
 export function buildPrompt(c, s, zh, outPath) {
-  return BUILDERS[s.variant](c, s, zh).replaceAll("OUT_PATH", outPath);
+  const pose = poseFor(s.seed);
+  return BUILDERS[s.variant](c, s, zh, pose).replaceAll("OUT_PATH", outPath);
 }
