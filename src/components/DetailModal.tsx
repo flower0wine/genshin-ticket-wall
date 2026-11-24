@@ -1,4 +1,5 @@
 import type { TicketSpec } from "../types";
+import { fallbackIcon } from "../data";
 
 const fmtDate = (d: Date) =>
   `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
@@ -15,6 +16,7 @@ export function DetailModal({ spec, onClose }: { spec: TicketSpec; onClose: () =
           <img
             src={spec.artSrc ?? spec.iconSrc}
             alt={spec.zhName}
+            onError={(e) => { e.currentTarget.src = fallbackIcon(c); }}
             style={{
               width: 132, height: 132, objectFit: "contain",
               borderRadius: spec.artSrc ? 8 : "50%",

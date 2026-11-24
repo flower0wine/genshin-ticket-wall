@@ -1,5 +1,6 @@
 import { QRCodeSVG } from "qrcode.react";
 import type { TicketSpec } from "../types";
+import { fallbackIcon } from "../data";
 import { Barcode, BarcodeBlocks, Diamonds, Sparkles } from "./decor";
 import { ticketClip } from "./ticket-clip";
 
@@ -12,7 +13,12 @@ function OverflowArt({ spec, style }: { spec: TicketSpec; style?: React.CSSPrope
   const generated = Boolean(spec.artSrc);
   return (
     <div className={`art-overflow ${generated ? "" : "icon"}`} style={style}>
-      <img src={spec.artSrc ?? spec.iconSrc} alt={spec.zhName} loading="lazy" />
+      <img
+        src={spec.artSrc ?? spec.iconSrc}
+        alt={spec.zhName}
+        loading="lazy"
+        onError={(e) => { e.currentTarget.src = fallbackIcon(spec.character); }}
+      />
     </div>
   );
 }
@@ -153,7 +159,9 @@ export function ExpoTicket({ spec }: { spec: TicketSpec }) {
               display: "flex", alignItems: "center", justifyContent: "center", margin: "3px 0",
               overflow: "hidden",
             }}>
-              <img src={spec.iconSrc} alt="" style={{ width: "88%", height: "88%", borderRadius: "50%", objectFit: "cover" }} />
+              <img src={spec.iconSrc} alt=""
+                onError={(e) => { e.currentTarget.src = fallbackIcon(spec.character); }}
+                style={{ width: "88%", height: "88%", borderRadius: "50%", objectFit: "cover" }} />
             </div>
             <span className="t-cond" style={{ fontSize: 6.5, letterSpacing: "0.1em" }}>./projectTEYVAT</span>
             <Diamonds color="#fdf9f0" style={{ fontSize: 6 }} />
@@ -278,10 +286,12 @@ export function GridTicket({ spec }: { spec: TicketSpec }) {
           }}>
             {Array.from({ length: 8 }, (_, i) => (
               <div key={i} style={{ background: p.tint, borderRadius: 4, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <img src={tileImg} alt="" loading="lazy" style={{
-                  width: "86%", height: "86%", objectFit: "contain",
-                  borderRadius: spec.artSrc ? 0 : "50%",
-                }} />
+                <img src={tileImg} alt="" loading="lazy"
+                  onError={(e) => { e.currentTarget.src = fallbackIcon(spec.character); }}
+                  style={{
+                    width: "86%", height: "86%", objectFit: "contain",
+                    borderRadius: spec.artSrc ? 0 : "50%",
+                  }} />
               </div>
             ))}
           </div>

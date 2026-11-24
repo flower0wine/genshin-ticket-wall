@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { CHARACTERS, rng, ticketSpec } from "../data";
+import { CHARACTERS, fallbackIcon, rng, ticketSpec } from "../data";
 import { ART_MANIFEST } from "../data/art-manifest";
 
 /** Background scraps: grid papers, kraft cards, lyric strips — pinned under tickets. */
@@ -73,7 +73,8 @@ export function BoardScraps() {
             }}
             aria-hidden
           >
-            <img src={spec.iconSrc} alt="" loading="lazy" />
+            <img src={spec.iconSrc} alt="" loading="lazy"
+              onError={(e) => { e.currentTarget.src = fallbackIcon(c); }} />
             <span>{c.name.toUpperCase().slice(0, 10)}</span>
           </div>
         );

@@ -24,6 +24,23 @@ const FALLBACK_PALETTE: Palette = {
 export const paletteFor = (vision: string): Palette =>
   VISION_PALETTES[vision as Exclude<Vision, "">] ?? FALLBACK_PALETTE;
 
+/** Inline SVG placeholder for characters without an official icon (newer releases).
+    Returns a data URI so it works offline and on any host without extra assets. */
+export function fallbackIcon(c: Character): string {
+  const p = paletteFor(c.vision);
+  const letter = (c.name[0] ?? "?").toUpperCase();
+  const svg =
+    `<svg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'>` +
+    `<defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>` +
+    `<stop offset='0' stop-color='${p.base}'/><stop offset='1' stop-color='${p.deep}'/>` +
+    `</linearGradient></defs>` +
+    `<circle cx='64' cy='64' r='62' fill='url(#g)'/>` +
+    `<circle cx='64' cy='64' r='56' fill='none' stroke='${p.accent}' stroke-width='2' stroke-dasharray='4 5'/>` +
+    `<text x='64' y='78' font-family='Georgia,serif' font-size='56' font-weight='700' fill='${p.ink}' text-anchor='middle'>${letter}</text>` +
+    `</svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
 /** FNV-1a — stable seed so every ticket keeps its layout across renders/builds. */
 export function hashSeed(s: string): number {
   let h = 0x811c9dc5;
