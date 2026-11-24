@@ -1,0 +1,444 @@
+/* ── Teyvat Ticket Wall — corkboard collage, projectTiGER-style ─────── */
+:root {
+  --cork: #d3c5ae;
+  --cork-dot: #b9a88e;
+  --paper: #fdf9f0;
+  --ink: #2e2620;
+  --serif-en: "Playfair Display", "Noto Serif SC", serif;
+  --serif-zh: "Noto Serif SC", serif;
+  --sans-zh: "Noto Sans SC", sans-serif;
+  --script: "Caveat", cursive;
+  --condensed: "Oswald", "Noto Sans SC", sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans-zh);
+  color: var(--ink);
+  background-color: var(--cork);
+  background-image:
+    radial-gradient(var(--cork-dot) 1.1px, transparent 1.3px),
+    radial-gradient(rgba(255, 255, 255, 0.35) 1px, transparent 1.2px);
+  background-size: 22px 22px, 22px 22px;
+  background-position: 0 0, 11px 11px;
+  overflow-x: hidden;
+}
+
+/* spiral notebook binding along the top edge */
+.spiral {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: 34px;
+  background: linear-gradient(#e9e0cf, #d9cdb6);
+  box-shadow: 0 2px 6px rgba(60, 45, 25, 0.25);
+  overflow: hidden;
+}
+.spiral::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(ellipse 7px 11px at 16px 6px, #8d7c62 55%, transparent 60%);
+  background-size: 34px 34px;
+  background-repeat: repeat-x;
+}
+.spiral::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(100deg, transparent 12px, #f6f1e4 13px, #cfc3aa 17px, transparent 19px);
+  background-size: 34px 34px;
+  background-repeat: repeat-x;
+}
+
+/* ── header ── */
+.masthead {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 36px 24px 4px;
+  text-align: center;
+  position: relative;
+  z-index: 3;
+}
+.masthead h1 {
+  font-family: var(--serif-zh);
+  font-weight: 900;
+  font-size: clamp(30px, 5vw, 52px);
+  margin: 0;
+  letter-spacing: 0.06em;
+}
+.masthead .sub {
+  font-family: var(--serif-en);
+  font-style: italic;
+  font-size: clamp(14px, 2vw, 19px);
+  color: #6e5f4b;
+  margin-top: 6px;
+}
+.masthead .count {
+  font-family: var(--condensed);
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  color: #8a7a61;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+/* ── filter bar styled as a paper strip ── */
+.filters {
+  max-width: 1280px;
+  margin: 18px auto 6px;
+  padding: 12px 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  background: var(--paper);
+  border-radius: 4px;
+  box-shadow: 0 3px 10px rgba(60, 45, 25, 0.18);
+  transform: rotate(-0.3deg);
+  width: fit-content;
+  position: relative;
+  z-index: 4;
+}
+.chip {
+  font-family: var(--sans-zh);
+  font-weight: 700;
+  font-size: 13px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background: #efe7d6;
+  color: #5c5140;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.chip:hover { transform: translateY(-2px); }
+.chip.active { color: #fff; }
+.chip .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; }
+
+.searchbox {
+  font-family: var(--sans-zh);
+  font-size: 14px;
+  padding: 6px 14px;
+  border: 2px dashed #c9b995;
+  border-radius: 999px;
+  background: #fffdf6;
+  outline: none;
+  min-width: 180px;
+}
+.searchbox:focus { border-color: #8a7a61; }
+
+/* ── scattered background papers (under tickets) ── */
+.board {
+  position: relative;
+  max-width: 1340px;
+  margin: 0 auto;
+}
+.scrap {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  box-shadow: 0 4px 10px rgba(60, 45, 25, 0.18);
+}
+.scrap.grid-paper {
+  background: #fbf7ec;
+  background-image:
+    linear-gradient(#c9bfa8 1px, transparent 1px),
+    linear-gradient(90deg, #c9bfa8 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+.scrap.kraft { background: #e8ddc6; }
+.scrap.lyrics {
+  background: #f6efdc;
+  padding: 18px 14px;
+  font-family: var(--serif-zh);
+  font-size: 12px;
+  line-height: 2.1;
+  color: #6e6353;
+  writing-mode: vertical-rl;
+  overflow: hidden;
+}
+.scrap.pink-card { background: #f2c9c2; }
+.scrap.blue-dots {
+  background: #cfe3ea;
+  background-image: radial-gradient(#fff 2px, transparent 2.4px);
+  background-size: 13px 13px;
+}
+
+/* loose washi tapes on the board itself */
+.board-tape {
+  position: absolute;
+  z-index: 1;
+  width: 130px;
+  height: 34px;
+  opacity: 0.95;
+  box-shadow: 0 2px 5px rgba(60, 45, 25, 0.22);
+  clip-path: polygon(2% 0, 98% 4%, 100% 96%, 0 100%);
+  pointer-events: none;
+}
+.board-tape.stripes { background: repeating-linear-gradient(45deg, var(--tape-a) 0 9px, #fdf9f0 9px 18px); }
+.board-tape.dots {
+  background-color: var(--tape-a);
+  background-image: radial-gradient(#fff 2.8px, transparent 3.2px);
+  background-size: 15px 15px;
+}
+.board-tape.zigzag {
+  background: var(--tape-a);
+  clip-path: polygon(0 20%, 5% 0, 10% 20%, 15% 0, 20% 20%, 25% 0, 30% 20%, 35% 0, 40% 20%, 45% 0, 50% 20%, 55% 0, 60% 20%, 65% 0, 70% 20%, 75% 0, 80% 20%, 85% 0, 90% 20%, 95% 0, 100% 20%, 100% 80%, 95% 100%, 90% 80%, 85% 100%, 80% 80%, 75% 100%, 70% 80%, 65% 100%, 60% 80%, 55% 100%, 50% 80%, 45% 100%, 40% 80%, 35% 100%, 30% 80%, 25% 100%, 20% 80%, 15% 100%, 10% 80%, 5% 100%, 0 80%);
+}
+
+/* round character stamp pinned on the board (like TETO circle badge) */
+.board-stamp {
+  position: absolute;
+  z-index: 2;
+  border-radius: 50%;
+  background: #f4ecd9;
+  border: 2px solid #4a4036;
+  box-shadow: 0 3px 8px rgba(60, 45, 25, 0.25), inset 0 0 0 4px #f4ecd9, inset 0 0 0 5.5px #4a4036;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+}
+.board-stamp img { width: 62%; height: 62%; object-fit: contain; border-radius: 50%; }
+.board-stamp span {
+  font-family: var(--condensed);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: #4a4036;
+  margin-top: 2px;
+}
+
+/* ── wall: staggered two-column collage ── */
+.wall {
+  position: relative;
+  z-index: 2;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 20px 90px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 64px 26px;
+  align-items: start;
+}
+.wall > .ticket-slot:nth-child(even) { margin-top: 56px; }
+.wall > .ticket-slot:nth-child(3n) { margin-left: -14px; }
+.wall > .ticket-slot:nth-child(3n + 1) { margin-right: -10px; }
+@media (max-width: 980px) {
+  .wall { grid-template-columns: 1fr; }
+  .wall > .ticket-slot:nth-child(even) { margin-top: 0; }
+}
+@media (max-width: 520px) {
+  .wall { gap: 40px; padding: 24px 10px 70px; }
+}
+
+.ticket-slot { position: relative; }
+.ticket-wrap { position: relative; outline: none; }
+.ticket-wrap:focus-visible { outline: 3px dashed #8a7a61; outline-offset: 6px; }
+
+/* washi tape strips pinned over ticket corners */
+.tape {
+  position: absolute;
+  width: 118px;
+  height: 32px;
+  opacity: 0.94;
+  z-index: 30;
+  box-shadow: 0 2px 4px rgba(60, 45, 25, 0.2);
+  clip-path: polygon(2% 0, 98% 4%, 100% 96%, 0 100%);
+  pointer-events: none;
+}
+.tape.stripes { background: repeating-linear-gradient(45deg, var(--tape-a) 0 8px, #fdf9f0 8px 16px); }
+.tape.dots {
+  background-color: var(--tape-a);
+  background-image: radial-gradient(#fff 2.6px, transparent 3px);
+  background-size: 14px 14px;
+}
+.tape.plain { background: var(--tape-a); }
+
+/* ── ticket base ──
+   The whole ticket silhouette (zigzag short edges + semicircle side notches)
+   is cut by ONE clip-path on .ticket-shell; art may overflow above it. */
+.ticket {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 2.3 / 1;
+  transition: transform 0.25s ease;
+}
+.ticket-slot:hover .ticket { transform: scale(1.035); z-index: 10; }
+
+.ticket-shadow {
+  position: absolute;
+  inset: 4px 2px -6px 2px;
+  z-index: 0;
+  filter: blur(9px);
+  opacity: 0.38;
+  background: #3a2d1c;
+  border-radius: 12px;
+  transform: translateY(7px);
+}
+
+.ticket-shell {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  /* zigzag left/right + punch notches top/bottom at the perforation, all in one path */
+  clip-path: var(--ticket-clip);
+  z-index: 1;
+}
+
+.ticket .main { position: relative; flex: 1 1 68%; overflow: hidden; }
+.ticket .stub { position: relative; flex: 0 0 32%; overflow: hidden; }
+
+/* perforation dashes */
+.perforation {
+  position: absolute;
+  top: 2%;
+  bottom: 2%;
+  left: 68%;
+  width: 0;
+  border-left: 2.5px dashed rgba(255, 255, 255, 0.85);
+  z-index: 6;
+}
+.perforation.dark { border-left-color: rgba(46, 38, 32, 0.45); }
+
+/* overflowing character art — breaks the ticket frame like the reference */
+.art-overflow {
+  position: absolute;
+  z-index: 8;
+  pointer-events: none;
+  user-select: none;
+}
+.art-overflow img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  /* white sticker outline around generated chibi art */
+  filter:
+    drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff)
+    drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff)
+    drop-shadow(1.5px 1.5px 0 #fff) drop-shadow(-1.5px 1.5px 0 #fff)
+    drop-shadow(1.5px -1.5px 0 #fff) drop-shadow(-1.5px -1.5px 0 #fff)
+    drop-shadow(0 7px 9px rgba(50, 35, 15, 0.3));
+}
+.art-overflow.icon img {
+  border-radius: 50%;
+  object-fit: cover;
+  filter: drop-shadow(0 0 0 #fff) drop-shadow(0 6px 8px rgba(50, 35, 15, 0.3));
+  border: 4px solid #fff;
+}
+
+/* in-ticket art (clipped variant, for grid tiles etc.) */
+.art { position: absolute; z-index: 3; pointer-events: none; user-select: none; }
+.art img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.art.icon img { border-radius: 50%; object-fit: cover; }
+
+/* typography helpers */
+.t-serif { font-family: var(--serif-en); }
+.t-zh { font-family: var(--serif-zh); }
+.t-script { font-family: var(--script); }
+.t-cond { font-family: var(--condensed); }
+
+/* barcode */
+.barcode {
+  background-image: repeating-linear-gradient(
+    90deg,
+    currentColor 0 2px, transparent 2px 4px,
+    currentColor 4px 7px, transparent 7px 9px,
+    currentColor 9px 10px, transparent 10px 14px
+  );
+}
+/* white barcode blocks on colored stub (reference TETO left stub) */
+.barcode-blocks { display: flex; flex-direction: column; gap: 5px; }
+.barcode-blocks i {
+  display: block;
+  height: 9px;
+  background: repeating-linear-gradient(90deg, #fff 0 3px, transparent 3px 5px, #fff 5px 9px, transparent 9px 12px);
+}
+
+.qr { background: #fff; padding: 5px; border-radius: 3px; line-height: 0; }
+
+/* diamond separator ◆◆◆ */
+.diamonds { letter-spacing: 0.35em; font-size: 8px; }
+
+/* round ink stamp with rough mask */
+.stamp {
+  position: absolute;
+  border: 2.5px solid currentColor;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-family: var(--condensed);
+  letter-spacing: 0.12em;
+  opacity: 0.85;
+  transform: rotate(-14deg);
+  z-index: 6;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.55' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.9 0.12'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  mask-size: 120px 120px;
+}
+
+.sparkle { position: absolute; z-index: 2; pointer-events: none; }
+
+/* footer */
+.colophon {
+  text-align: center;
+  padding: 0 20px 46px;
+  font-family: var(--serif-en);
+  font-style: italic;
+  color: #7c6c54;
+  font-size: 14px;
+  position: relative;
+  z-index: 3;
+}
+.colophon a { color: #5c4f3d; }
+
+/* detail modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(46, 38, 32, 0.55);
+  backdrop-filter: blur(3px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-card {
+  background: var(--paper);
+  border-radius: 10px;
+  max-width: 760px;
+  width: 100%;
+  max-height: 88vh;
+  overflow: auto;
+  padding: 26px 28px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.4);
+  position: relative;
+}
+.modal-card h2 { font-family: var(--serif-zh); font-weight: 900; margin: 0 0 2px; }
+.modal-card .en { font-family: var(--serif-en); font-style: italic; color: #8a7a61; }
+.modal-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px 18px;
+  margin: 16px 0;
+  font-size: 14px;
+}
+.modal-meta b { display: block; font-size: 11px; letter-spacing: 0.15em; color: #9a8a6e; text-transform: uppercase; }
+.modal-close {
+  position: absolute;
+  top: 12px; right: 14px;
+  border: none; background: none;
+  font-size: 22px; cursor: pointer; color: #8a7a61;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticket, .chip { transition: none; }
+}
