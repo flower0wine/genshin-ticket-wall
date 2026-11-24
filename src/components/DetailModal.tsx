@@ -12,6 +12,13 @@ export function DetailModal({ spec, onClose }: { spec: TicketSpec; onClose: () =
         <button className="modal-close" onClick={onClose} aria-label="关闭">✕</button>
         <h2>{spec.zhName}</h2>
         <div className="en">{c.name} — {c.title}</div>
+        {spec.ticketImg && (
+          <img
+            src={spec.ticketImg}
+            alt={`${spec.zhName} 演唱会门票`}
+            style={{ width: "100%", margin: "14px 0 4px", filter: "drop-shadow(0 6px 10px rgba(60,45,25,.25))" }}
+          />
+        )}
         <div style={{ display: "flex", gap: 22, alignItems: "center", margin: "14px 0" }}>
           <img
             src={spec.artSrc ?? spec.iconSrc}
@@ -33,12 +40,16 @@ export function DetailModal({ spec, onClose }: { spec: TicketSpec; onClose: () =
           <div><b>稀有度 Rarity</b>{"★".repeat(c.rarity)}</div>
           <div><b>命之座 Constellation</b>{c.constellation || "—"}</div>
           <div><b>实装 Release</b>{c.release ?? "—"}</div>
-          <div><b>演出日 Show Date</b>{fmtDate(spec.showDate)} 19:30</div>
+          <div><b>演出日 Show Date</b>{fmtDate(spec.showDate)} {String(spec.showDate.getUTCHours()).padStart(2, "0")}:{String(spec.showDate.getUTCMinutes()).padStart(2, "0")}</div>
           <div><b>票号 Serial</b>{spec.serial}</div>
           <div><b>入场 Gate / Row / Seat</b>{spec.gate} / {spec.row} / {spec.seat}</div>
         </div>
         <div style={{ fontSize: 12, color: "#9a8a6e" }}>
-          {spec.artSrc ? "票面插画：AI 生成 chibi 演唱会立绘" : "票面头像：官方角色图标（genshin.dev）— 运行 pnpm art:batch 可生成专属插画"}
+          {spec.ticketImg
+            ? "票面：AI 整票生图（参考 projectTiGER 拼贴风格，codex image_gen）"
+            : spec.artSrc
+              ? "票面插画：AI 生成 chibi 演唱会立绘"
+              : "票面头像：官方角色图标（genshin.dev）— 运行 pnpm tickets:batch 可生成整票插画"}
         </div>
       </div>
     </div>

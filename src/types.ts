@@ -47,4 +47,6 @@ export interface TicketSpec {
   seat: string;
   artSrc: string | null;
   iconSrc: string;
+  /** generated whole-ticket illustration (alpha WebP), null → CSS ticket fallback */
+  ticketImg: string | null;
 }

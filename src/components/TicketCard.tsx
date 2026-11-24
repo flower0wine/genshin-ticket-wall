@@ -17,16 +17,42 @@ export function TicketCard({ spec, onOpen }: { spec: TicketSpec; onOpen: (s: Tic
     return { rotate: -4 + r() * 8, tapeCorner: (["tl", "tr", "bl", "br"] as const)[Math.floor(r() * 4)] };
   }, [spec.seed]);
 
-  const Body = VARIANT_COMPONENT[spec.variant];
+  const open = () => onOpen(spec);
+  const onKey = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); }
+  };
 
+  // Generated whole-ticket illustration: display as a cut-out image with the
+  // same collage treatment (rotation, tape, shadow). Falls back to CSS ticket.
+  if (spec.ticketImg) {
+    return (
+      <div className="ticket-slot">
+        <Tape seed={spec.seed} palette={spec.palette} corner={tapeCorner} />
+        <div
+          className="ticket-wrap ticket-img-wrap"
+          style={{ transform: `rotate(${rotate}deg)` }}
+          onClick={open}
+          onKeyDown={onKey}
+          role="button"
+          tabIndex={0}
+          aria-label={`${spec.zhName} 演唱会门票详情`}
+        >
+          <div className="ticket-shadow" />
+          <img className="ticket-img" src={spec.ticketImg} alt={`${spec.zhName} 演唱会门票`} loading="lazy" />
+        </div>
+      </div>
+    );
+  }
+
+  const Body = VARIANT_COMPONENT[spec.variant];
   return (
     <div className="ticket-slot">
       <Tape seed={spec.seed} palette={spec.palette} corner={tapeCorner} />
       <div
         className="ticket-wrap"
         style={{ transform: `rotate(${rotate}deg)` }}
-        onClick={() => onOpen(spec)}
-        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(spec); } }}
+        onClick={open}
+        onKeyDown={onKey}
         role="button"
         tabIndex={0}
         aria-label={`${spec.zhName} 演唱会门票详情`}

@@ -66,20 +66,26 @@ const VARIANTS: TicketVariant[] = ["symphony", "expo", "flower", "grid"];
 const GATES = ["A", "B", "C", "D", "E", "F", "G"];
 
 /** Deterministically derive the whole ticket spec from character data. */
-export function ticketSpec(c: Character, artManifest: Record<string, string>): TicketSpec {
+export function ticketSpec(
+  c: Character,
+  artManifest: Record<string, string>,
+  ticketManifest: Record<string, string> = {},
+): TicketSpec {
   const seed = hashSeed(c.slug);
   const r = rng(seed);
   const variant = VARIANTS[Math.floor(r() * VARIANTS.length)];
 
   // Show date: birthday when known, otherwise release date, otherwise seeded 2026 date.
+  // Grid variant doors at 17:00, others 18:30 (matches ticket art + CSS fallback).
+  const hour = variant === "grid" ? 17 : 18;
   let showDate: Date;
   if (c.birthday && !c.birthday.startsWith("0000-00")) {
     const [, m, d] = c.birthday.split("-").map(Number);
-    showDate = new Date(Date.UTC(2026, m - 1, d, 19, 30));
+    showDate = new Date(Date.UTC(2026, m - 1, d, hour, 30));
   } else if (c.release) {
-    showDate = new Date(`${c.release}T19:30:00Z`);
+    showDate = new Date(`${c.release}T${String(hour).padStart(2, "0")}:30:00Z`);
   } else {
-    showDate = new Date(Date.UTC(2026, Math.floor(r() * 12), 1 + Math.floor(r() * 28), 19, 30));
+    showDate = new Date(Date.UTC(2026, Math.floor(r() * 12), 1 + Math.floor(r() * 28), hour, 30));
   }
 
   const serial = `No.${String(seed % 100000000).padStart(8, "0")}`;
@@ -96,5 +102,6 @@ export function ticketSpec(c: Character, artManifest: Record<string, string>): T
     seat: String(1 + Math.floor(r() * 49)).padStart(2, "0"),
     artSrc: artManifest[c.slug] ?? null,
     iconSrc: `${import.meta.env.BASE_URL}icons/${c.slug}.png`,
+    ticketImg: ticketManifest[c.slug] ?? null,
   };
 }

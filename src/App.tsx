@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { CHARACTERS, paletteFor, ticketSpec } from "./data";
 import { ART_MANIFEST } from "./data/art-manifest";
+import { TICKET_MANIFEST } from "./data/ticket-manifest";
 import type { TicketSpec } from "./types";
 import { TicketCard } from "./components/TicketCard";
 import { DetailModal } from "./components/DetailModal";
@@ -24,7 +25,7 @@ export default function App() {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<TicketSpec | null>(null);
 
-  const specs = useMemo(() => CHARACTERS.map((c) => ticketSpec(c, ART_MANIFEST)), []);
+  const specs = useMemo(() => CHARACTERS.map((c) => ticketSpec(c, ART_MANIFEST, TICKET_MANIFEST)), []);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -46,7 +47,7 @@ export default function App() {
       <header className="masthead">
         <h1>提瓦特巡演票墙</h1>
         <div className="sub">[Delusional] Teyvat Concert Tickets Addendum — every character, one live</div>
-        <div className="count">{CHARACTERS.length} characters · {Object.keys(ART_MANIFEST).length} generated arts · ./projectTEYVAT 2026</div>
+        <div className="count">{CHARACTERS.length} characters · {Object.keys(TICKET_MANIFEST).length} illustrated tickets · ./projectTEYVAT 2026</div>
       </header>
 
       <nav className="filters" aria-label="角色筛选">
