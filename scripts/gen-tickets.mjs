@@ -53,8 +53,18 @@ for (const slug of slugs) {
   const cmd = useJs ? process.execPath : "codex";
   const finalArgs = useJs ? [codexJs, ...args] : args;
   console.log(`generating ${slug} (${s.variant}) ...`);
-  const r = spawnSync(cmd, finalArgs, { cwd: ROOT, encoding: "utf8", shell: false, timeout: 600000 });
-  if (exists(out)) { console.log(`ok ${slug}`); ok++; }
-  else { console.error(`FAILED ${slug}: ${(r.stderr || r.stdout || "").slice(-200)}`); fail++; }
+  // stdio:"ignore" so spawnSync never blocks on lingering grandchild stdio;
+  // hard timeout + SIGKILL; retry once if the file did not land.
+  let produced = false;
+  for (let attempt = 1; attempt <= 2 && !produced; attempt++) {
+    spawnSync(cmd, finalArgs, {
+      cwd: ROOT, shell: false, stdio: "ignore",
+      timeout: 300000, killSignal: "SIGKILL",
+    });
+    produced = exists(out);
+    if (!produced && attempt === 1) console.log(`retry ${slug} ...`);
+  }
+  if (produced) { console.log(`ok ${slug}`); ok++; }
+  else { console.error(`FAILED ${slug}`); fail++; }
 }
 console.log(`done: ${ok} ok, ${fail} failed`);
