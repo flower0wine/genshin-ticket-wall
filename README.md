@@ -6,7 +6,9 @@
 
 **在线预览**: https://flower0wine.github.io/genshin-ticket-wall/
 
-![preview](docs/preview.png)
+![preview](docs/preview.jpg)
+
+*12 张代表性票面（共 121 张，每角色一张性格化整票插画）。完整拼贴墙见在线预览。*
 
 ## 元素构成 — 什么用代码，什么用生图
 
@@ -71,7 +73,7 @@ node scripts/gen-art.mjs furina
 node scripts/optimize-art.mjs && node scripts/alpha-art.mjs
 ```
 
-生图风格锁定：每次生图都附上 `refs/reference-collage.png`（projectTiGER 参考拼贴）作为风格参考，再附官方角色图标锚定发色/瞳色/服饰；prompt 按版式描述票面布局与全部文字，票号/日期/座位由 `scripts/ticket-spec.mjs` 从角色数据派生，与页面兜底票面、详情 modal 完全一致。
+生图风格锁定：每次生图都附上 `refs/reference-collage.png`（projectTiGER 参考拼贴）作为风格参考，再附官方角色图标锚定发色/瞳色/服饰（无官方图标的新角色按描述设计）；**每个角色的动作由其性格/设定驱动**（`scripts/character-poses.mjs` 的 121 条 lore 姿态映射：钟离沉稳背手、胡桃俏皮弄鬼、可莉蹦跳丢炸弹、雷电将军威严拔刀……），不是套模板举麦克风。prompt 按版式描述票面布局与全部文字，票号/日期/座位由 `scripts/ticket-spec.mjs` 从角色数据派生，与页面兜底票面、详情 modal 完全一致。
 
 新角色上线时：在 `src/data/zh-names.ts` 的 `EXTRA_CHARACTERS` 追加条目（或等上游更新后 `pnpm data:sync`），跑 `gen-tickets.mjs <slug>` + `process-tickets.mjs <slug>` 即可，无需改任何组件。
 
@@ -83,8 +85,10 @@ node scripts/optimize-art.mjs && node scripts/alpha-art.mjs
 ├── scripts/            # 数据同步 / 图标下载 / 整票生图 / chibi 生图 / 图片后处理
 │   ├── ticket-spec.mjs     # 票面规格派生（Node 版，与 src/data 一致）
 │   ├── ticket-prompts.mjs  # 四版式生图 prompt 模板
-│   ├── gen-tickets.mjs     # 整票批量生图
-│   └── process-tickets.mjs # 去白底 + alpha WebP
+│   ├── character-poses.mjs # 121 条角色性格驱动姿态映射
+│   ├── gen-tickets.mjs     # 整票批量生图（stdio-ignore + 超时 + 重试）
+│   ├── process-tickets.mjs # 去白底 + alpha WebP
+│   └── make-preview.mjs    # 票面接触表预览图
 ├── src/
 │   ├── data/           # characters.json + 中文名与新增角色 + 票面规格 + 生图 manifest
 │   ├── components/     # tickets.tsx 四版式兜底 · decor.tsx · ticket-clip.ts · TicketCard · DetailModal · BoardScraps

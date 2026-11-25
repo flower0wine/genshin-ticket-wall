@@ -44,11 +44,12 @@ for (const slug of slugs) {
   const c = bySlug.get(slug);
   if (!c) { console.error(`unknown slug ${slug}`); fail++; continue; }
   const s = specFor(c);
-  const prompt = buildPrompt(c, s, zh[slug] ?? c.name, out);
   const icon = path.join(ROOT, "public/icons", `${slug}.png`);
+  const hasIcon = exists(icon);
+  const prompt = buildPrompt(c, s, zh[slug] ?? c.name, out, hasIcon);
 
   const args = ["exec", "--skip-git-repo-check", "-s", "workspace-write", "-i", REF];
-  if (exists(icon)) args.push("-i", icon);
+  if (hasIcon) args.push("-i", icon);
   args.push("--", prompt);
   const cmd = useJs ? process.execPath : "codex";
   const finalArgs = useJs ? [codexJs, ...args] : args;
