@@ -5,7 +5,7 @@ import { readFileSync, existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 
 const DIR = path.resolve("public/tickets");
-const logs = ["g0", "g1", "g2", "tk0", "tk1", "tk2", "tk3"].map((n) => `gen/${n}.log`);
+const logs = ["p0", "p1", "p2", "g0", "g1", "g2", "tk0", "tk1", "tk2", "tk3"].map((n) => `gen/${n}.log`);
 const done = new Set();
 for (const l of logs) {
   if (!existsSync(l)) continue;
