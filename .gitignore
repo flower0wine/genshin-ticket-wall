@@ -4,4 +4,5 @@ dist
 *.tsbuildinfo
 gen/
 refs/
+tmp/
 .DS_Store
