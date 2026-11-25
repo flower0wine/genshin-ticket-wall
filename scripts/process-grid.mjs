@@ -4,7 +4,7 @@ import { readFileSync, existsSync, readdirSync } from "node:fs";
 import path from "node:path";
 const DIR = path.resolve("public/tickets");
 const done = new Set();
-for (const n of ["grid0", "grid1", "grid2", "s0", "s1", "s2", "s3", "s4", "s5"]) {
+for (const n of ["grid0", "grid1", "grid2", "s0", "s1", "s2", "s3", "s4", "s5", "r0", "r1"]) {
   const l = `gen/${n}.log`;
   if (!existsSync(l)) continue;
   for (const m of readFileSync(l, "utf8").matchAll(/^ok (\S+)$/gm)) done.add(m[1]);
